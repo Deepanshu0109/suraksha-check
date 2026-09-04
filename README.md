@@ -125,6 +125,4 @@ This is an active final-year project, not a finished product. Honestly scoped ne
 - **Security hardening** — hashed OTPs, word-boundary rule matching instead of substring matching, and a production-grade TTS provider.
 - **Additional regional languages** beyond Hindi and English.
 
-## Team
 
-Built by Deepanshu, Vritika, Harshit Jethi, and Dhruv — B.Tech CSE, M.M. Engineering College (Maharishi Markandeshwar Deemed University), as a final-year project under the supervision of Dr. Neeraj Mangla.
