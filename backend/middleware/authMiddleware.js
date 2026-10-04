@@ -3,22 +3,17 @@ const jwt = require('jsonwebtoken');
 const protect = (req, res, next) => {
     let token;
 
-    // Check if the authorization header exists and starts with 'Bearer'
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
-            // Extract the token from the header (Format: "Bearer <token>")
             token = req.headers.authorization.split(' ')[1];
-
-            // Verify the token
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-            // Attach the user's ID and role to the request object
             req.user = {
                 id: decoded.id,
                 role: decoded.role
             };
 
-            next(); // Move to the actual route controller
+            next(); 
         } catch (error) {
             console.error(error);
             return res.status(401).json({ error: 'Not authorized, token failed or expired' });
@@ -30,4 +25,13 @@ const protect = (req, res, next) => {
     }
 };
 
-module.exports = { protect };
+// NEW: Admin role guard
+const adminOnly = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        return res.status(403).json({ error: 'Access denied. Admin privileges required.' });
+    }
+};
+
+module.exports = { protect, adminOnly };

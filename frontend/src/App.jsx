@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import PrimaryDashboard from './pages/PrimaryDashboard';
 import GuardianDashboard from './pages/GuardianDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -29,6 +30,14 @@ function App() {
             element={
               <ProtectedRoute allowedRole="guardian">
                 <GuardianDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute allowedRole="admin">
+                <AdminDashboard />
               </ProtectedRoute>
             } 
           />

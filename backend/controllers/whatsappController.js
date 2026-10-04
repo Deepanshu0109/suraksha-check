@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Check = require('../models/Check');
+const ScamPattern = require('../models/ScamPattern');
 const { runRuleBasedCheck } = require('../services/detectionService');
 const { runAICheck } = require('../services/aiService');
 const { extractTextFromImage } = require('../services/ocrService');
@@ -103,6 +104,7 @@ exports.receiveMessage = async (req, res) => {
                 let pipelineResult = await runRuleBasedCheck(rawText);
 
                 // 4. Pipeline Stage 2: AI Fallback
+                // 4. Pipeline Stage 2: AI Fallback
                 if (pipelineResult.verdict === 'pending') {
                     console.log('[System] Rules missed. Routing to AI...');
                     
@@ -111,6 +113,30 @@ exports.receiveMessage = async (req, res) => {
                         user.preferredLanguage
                     );
                     pipelineResult.detectionStage = 'ai';
+
+                    // --- NEW: AUTO-CAPTURE UNKNOWN PATTERNS FOR ADMIN REVIEW ---
+                    if (pipelineResult.verdict === 'scam' || pipelineResult.verdict === 'suspicious') {
+                        try {
+                            const existingPattern = await ScamPattern.findOne({ patternText: rawText });
+                            if (existingPattern) {
+                                existingPattern.occurrenceCount += 1;
+                                await existingPattern.save();
+                                console.log(`[Admin] Incremented pending pattern count to ${existingPattern.occurrenceCount}`);
+                            } else {
+                                await ScamPattern.create({
+                                    patternText: rawText,
+                                    keywords: [rawText.substring(0, 30)], // Satisfy schema requirement safely
+                                    category: 'other', // AI fallback category
+                                    status: 'pending',
+                                    occurrenceCount: 1
+                                });
+                                console.log('[Admin] Logged new pending pattern for review.');
+                            }
+                        } catch (err) {
+                            console.error('[Admin] Failed to log pending pattern:', err.message);
+                        }
+                    }
+                    // -----------------------------------------------------------
                 }
 
                 // 5. Generate Audio FIRST

@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const scamPatternSchema = new mongoose.Schema({
+    patternText: {
+        type: String,
+        trim: true
+    },
     keywords: [{
         type: String,
         required: true,
@@ -18,6 +22,10 @@ const scamPatternSchema = new mongoose.Schema({
     verifiedCount: {
         type: Number,
         default: 0 
+    },
+    occurrenceCount: {
+        type: Number,
+        default: 1 // Tracks how many times the AI has caught this exact text
     },
     status: {
         type: String,
